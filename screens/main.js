@@ -12,14 +12,23 @@ import {
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as FaceDetector from "expo-face-detector";
+import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
+
 import Filter1 from "../components/filter1";
+
+
+const data = [
+  { id: "crown-pic1", src: require("../assets/crown-pic1.png") },
+
+];
 
 export default class Main extends Component {
   constructor(props) {
     super(props);
     this.state = {
       hasCameraPermission: null,
-      faces: []
+      faces: [],
+      current_filter: "crown-pic1"
     };
 
     this.onFacesDetected = this.onFacesDetected.bind(this);
@@ -51,7 +60,7 @@ export default class Main extends Component {
       <View style={styles.container}>
         <SafeAreaView style={styles.droidSafeArea} />
         <View style={styles.upperContainer}>
-        
+
           <Text style={styles.appName}>Look Me....</Text>
         </View>
         <View style={styles.middleContainer}>
@@ -66,13 +75,48 @@ export default class Main extends Component {
             onFacesDetected={this.onFacesDetected}
             onFacesDetectionError={this.onFacesDetectionError}
           />
-          {this.state.faces.map(face => (
-            <Filter1 key={`face-id-${face.faceID}`} face={face} />
-          ))}
+          {this.state.faces.map(face => {
+            if (this.state.current_filter === "crown-pic1") {
+              return <Filter1 key={face.faceID} face={face} />;
+            }
+          })}
         </View>
         <View style={styles.lowerContainer}>
           <View style={styles.lowerTopContainer}></View>
-          <View style={styles.lowerBottomContainer}></View>
+          <View style={styles.lowerBottomContainer}>
+            <ScrollView
+              contentContainerStyle={styles.filters}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            >
+              {data.map(filter_data => {
+                return (
+                  <TouchableOpacity
+                    key={`filter-button-${filter_data.id}`}
+                    style={[
+                      styles.filterButton,
+                      {
+                        borderColor:
+                          this.state.current_filter === filter_data.id
+                            ? "#FFA384"
+                            : "#FFFF"
+                      }
+                    ]}
+                    onPress={() =>
+                      this.setState({
+                        current_filter: `${filter_data.id}`
+                      })
+                    }
+                  >
+                    <Image
+                      source={filter_data.src}
+                      style={styles.filterImage}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
         </View>
       </View>
     );
@@ -95,12 +139,18 @@ const styles = StyleSheet.create({
     flexDirection: "row"
   },
   appIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25
+    width: RFValue(50),
+    height: RFValue(50),
+    borderRadius: RFValue(25),
+    borderWidth: 2,
+    borderColor: "#FFA384",
+    marginRight: RFValue(10)
   },
   appName: {
-    fontSize: 25
+    color: "#FFA384",
+    fontSize: RFValue(25),
+    fontWeight: "800",
+    fontStyle: "italic"
   },
   middleContainer: { flex: 0.67 },
   lowerContainer: {
@@ -117,5 +167,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#EFE7BC"
+  },
+  filters: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  filterButton: {
+    height: RFValue(70),
+    width: RFValue(70),
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: RFValue(35),
+    backgroundColor: "#E7F2F8",
+    borderWidth: 5,
+    marginRight: RFValue(20),
+    marginBottom: RFValue(10)
+  },
+  filterImage: {
+    height: "60%",
+    width: "60%",
+    alignSelf: "center",
+    resizeMode: "contain"
   }
 });
